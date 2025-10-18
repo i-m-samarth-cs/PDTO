@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="logo.png">
+    <title>Personal Digital Toolkit Organizer (PDTO)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2d2d2d;
+            --bg-tertiary: #3d3d3d;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --border: #404040;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        body.light-mode {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-tertiary: #e5e5e5;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666666;
+            --border: #d0d0d0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border);
+        }
+
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .tab-container {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--border);
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .tab {
+            padding: 0.75rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 6px 6px 0 0;
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-size: 0.95rem;
+            position: relative;
+        }
+
+        .tab:hover {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            background: var(--bg-secondary);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--accent);
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .tool-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent);
+        }
+
+        .tool-card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .tool-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: var(--bg-tertiary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+
+        .tool-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .tool-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .tool-type-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            background: var(--accent);
+            color: white;
+            font-weight: 500;
+        }
+
+        .tool-purpose {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .tool-card:hover .tool-purpose {
+            display: block;
+        }
+
+        .tool-actions {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .tool-card:hover .tool-actions {
+            opacity: 1;
+        }
+
+        .icon-btn {
+            background: var(--bg-tertiary);
+            border: none;
+            padding: 0.4rem;
+            border-radius: 4px;
+            cursor: pointer;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            transition: background 0.2s;
+        }
+
+        .icon-btn:hover {
+            background: var(--border);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 2rem;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .close-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-secondary);
+            padding: 0.25rem 0.5rem;
+        }
+
+        .close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+        }
+
+        .floating-btn {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+            z-index: 50;
+        }
+
+        .floating-btn:hover {
+            background: var(--accent-hover);
+            transform: scale(1.1);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .required {
+            color: var(--danger);
+        }
+
+        .date-added {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .file-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--accent);
+            background: var(--bg-tertiary);
+        }
+
+        .file-upload-area.drag-over {
+            border-color: var(--accent);
+            background: var(--bg-tertiary);
+        }
+
+        .file-info {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            text-align: left;
+        }
+
+        .file-info.active {
+            display: block;
+        }
+
+        .file-info-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .toggle-btn:hover {
+            border-color: var(--accent);
+        }
+
+        .toggle-btn.active {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+        }
+
+        .input-section {
+            display: none;
+        }
+
+        .input-section.active {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.2rem;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+
+            .tools-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .floating-btn {
+                bottom: 1rem;
+                right: 1rem;
+                width: 50px;
+                height: 50px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <h1>📦 Personal Digital Toolkit Organizer</h1>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="exportData()">Export</button>
+            <button class="btn btn-secondary" onclick="importData()">Import</button>
+            <button class="theme-toggle" onclick="toggleTheme()">
+                <span id="theme-icon">🌙</span>
+            </button>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="tab-container" id="tabs">
+            <!-- Tabs will be dynamically generated -->
+        </div>
+
+        <div class="tools-grid" id="tools-grid">
+            <!-- Tool cards will be dynamically generated -->
+        </div>
+    </div>
+
+    <button class="floating-btn" onclick="openAddToolModal()">+</button>
+
+    <!-- Add/Edit Tool Modal -->
+    <div class="modal" id="tool-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Add New Tool</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="tool-form" onsubmit="saveTool(event)">
+                <!-- Toggle between File and URL -->
+                <div class="toggle-group">
+                    <button type="button" class="toggle-btn active" onclick="toggleInputMode('file')">📁 Local File/App</button>
+                    <button type="button" class="toggle-btn" onclick="toggleInputMode('url')">🌐 Web URL</button>
+                </div>
+
+                <!-- File Upload Section -->
+                <div class="input-section active" id="file-section">
+                    <div class="file-upload-area" id="file-upload-area" onclick="document.getElementById('file-input').click()">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📂</div>
+                        <div style="font-size: 1.1rem; margin-bottom: 0.5rem;">Click to select file or drag & drop</div>
+                        <div style="font-size: 0.85rem; color: var(--text-secondary);">
+                            Supported: .exe, .apk, .html, .lnk, .app, .sh, or any file
+                        </div>
+                    </div>
+                    <input type="file" id="file-input" style="display: none;" onchange="handleFileSelect(event)">
+                    
+                    <div class="file-info" id="file-info">
+                        <div class="file-info-item">
+                            <strong>File Name:</strong>
+                            <span id="file-name-display"></span>
+                        </div>
+                        <div class="file-info-item">
+                            <strong>File Path:</strong>
+                            <span id="file-path-display" style="font-size: 0.85rem; color: var(--text-secondary);"></span>
+                        </div>
+                        <div class="file-info-item">
+                            <strong>File Type:</strong>
+                            <span id="file-type-display"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- URL Input Section -->
+                <div class="input-section" id="url-section">
+                    <div class="form-group">
+                        <label>Web URL <span class="required">*</span></label>
+                        <input type="url" id="tool-url" placeholder="https://example.com">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Tool Name <span class="required">*</span></label>
+                    <input type="text" id="tool-name" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Category <span class="required">*</span></label>
+                    <select id="tool-category" required>
+                        <!-- Categories will be populated dynamically -->
+                    </select>
+                    <button type="button" class="btn btn-secondary" onclick="addNewCategory()" style="margin-top: 0.5rem;">+ Add New Category</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Purpose / The "Why" <span class="required">*</span></label>
+                    <input type="text" id="tool-purpose" required placeholder="A concise description of what this tool does">
+                </div>
+
+                <div class="form-group">
+                    <label>Tool Icon (Emoji or URL)</label>
+                    <input type="text" id="tool-icon" placeholder="🚀 or https://example.com/icon.png">
+                </div>
+
+                <div class="form-group">
+                    <label>Usage Notes (Optional)</label>
+                    <textarea id="tool-notes" placeholder="Detailed notes, API keys, workflows, tutorials..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Tool</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Detail View Modal -->
+    <div class="modal" id="detail-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="detail-title">Tool Details</h2>
+                <button class="close-btn" onclick="closeDetailModal()">&times;</button>
+            </div>
+            <div id="detail-content">
+                <!-- Content will be populated dynamically -->
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeDetailModal()">Close</button>
+                <button class="btn btn-primary" onclick="editCurrentTool()">Edit</button>
+                <button class="btn" style="background: var(--danger); color: white;" onclick="deleteCurrentTool()">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Structure
+        let tools = [];
+        let categories = ['Applications', 'Web Tools', 'Development', 'Utilities'];
+        let currentCategory = 'Applications';
+        let editingToolId = null;
+        let viewingToolId = null;
+        let currentInputMode = 'file';
+        let selectedFilePath = '';
+
+        // Initialize App
+        function init() {
+            loadData();
+            renderTabs();
+            renderTools();
+            loadTheme();
+            setupDragAndDrop();
+        }
+
+        // Drag and Drop Setup
+        function setupDragAndDrop() {
+            const uploadArea = document.getElementById('file-upload-area');
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('drag-over');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('drag-over');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleFile(files[0]);
+                }
+            });
+        }
+
+        // Toggle Input Mode
+        function toggleInputMode(mode) {
+            currentInputMode = mode;
+            
+            // Update toggle buttons
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Show/hide sections
+            document.getElementById('file-section').classList.toggle('active', mode === 'file');
+            document.getElementById('url-section').classList.toggle('active', mode === 'url');
+            
+            // Clear previous data
+            if (mode === 'file') {
+                document.getElementById('tool-url').value = '';
+            } else {
+                selectedFilePath = '';
+                document.getElementById('file-info').classList.remove('active');
+            }
+        }
+
+        // Handle File Selection
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                handleFile(file);
+            }
+        }
+
+        function handleFile(file) {
+            // Store file path (this will be the full path in browser context)
+            selectedFilePath = file.name; // In browser, we only get the filename
+            
+            // Try to get full path (works in some contexts)
+            if (file.path) {
+                selectedFilePath = file.path;
+            }
+            
+            // Auto-fill tool name from filename
+            const nameWithoutExt = file.name.replace(/\.[^/.]+$/, "");
+            document.getElementById('tool-name').value = nameWithoutExt;
+            
+            // Detect file type and set icon
+            const ext = file.name.split('.').pop().toLowerCase();
+            const iconMap = {
+                'exe': '⚙️',
+                'apk': '📱',
+                'html': '🌐',
+                'lnk': '🔗',
+                'app': '📦',
+                'sh': '💻',
+                'bat': '⚡',
+                'cmd': '⚡',
+                'py': '🐍',
+                'js': '📜',
+                'jar': '☕',
+                'msi': '📀'
+            };
+            
+            document.getElementById('tool-icon').value = iconMap[ext] || '📄';
+            
+            // Display file information
+            document.getElementById('file-name-display').textContent = file.name;
+            document.getElementById('file-path-display').textContent = selectedFilePath;
+            document.getElementById('file-type-display').textContent = ext.toUpperCase();
+            document.getElementById('file-info').classList.add('active');
+        }
+
+        // Local Storage Functions
+        function saveData() {
+            localStorage.setItem('pdto_tools', JSON.stringify(tools));
+            localStorage.setItem('pdto_categories', JSON.stringify(categories));
+        }
+
+        function loadData() {
+            const savedTools = localStorage.getItem('pdto_tools');
+            const savedCategories = localStorage.getItem('pdto_categories');
+            
+            if (savedTools) tools = JSON.parse(savedTools);
+            if (savedCategories) categories = JSON.parse(savedCategories);
+        }
+
+        // Theme Functions
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const icon = document.getElementById('theme-icon');
+            icon.textContent = document.body.classList.contains('light-mode') ? '☀️' : '🌙';
+            localStorage.setItem('pdto_theme', document.body.classList.contains('light-mode') ? 'light' : 'dark');
+        }
+
+        function loadTheme() {
+            const theme = localStorage.getItem('pdto_theme');
+            if (theme === 'light') {
+                document.body.classList.add('light-mode');
+                document.getElementById('theme-icon').textContent = '☀️';
+            }
+        }
+
+        // Tab Functions
+        function renderTabs() {
+            const tabsContainer = document.getElementById('tabs');
+            tabsContainer.innerHTML = categories.map(cat => `
+                <button class="tab ${cat === currentCategory ? 'active' : ''}" onclick="switchTab('${cat}')">
+                    ${cat}
+                </button>
+            `).join('');
+        }
+
+        function switchTab(category) {
+            currentCategory = category;
+            renderTabs();
+            renderTools();
+        }
+
+        // Tool Rendering
+        function renderTools() {
+            const grid = document.getElementById('tools-grid');
+            const filteredTools = tools.filter(t => t.category === currentCategory);
+
+            if (filteredTools.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No tools yet</h3>
+                        <p>Click the + button to add your first tool</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = filteredTools.map(tool => `
+                <div class="tool-card" onclick="openTool('${tool.url}', '${tool.type}')">
+                    <div class="tool-actions" onclick="event.stopPropagation()">
+                        <button class="icon-btn" onclick="openDetailModal('${tool.id}')">ℹ️</button>
+                    </div>
+                    <div class="tool-card-header">
+                        <div class="tool-icon">
+                            ${tool.icon ? (tool.icon.startsWith('http') ? `<img src="${tool.icon}" alt="${tool.name}">` : tool.icon) : '🔧'}
+                        </div>
+                        <div>
+                            <div class="tool-name">${tool.name}</div>
+                            ${tool.type === 'file' ? `<span class="tool-type-badge">Local App</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="tool-purpose">${tool.purpose}</div>
+                    <div class="date-added">Added: ${new Date(tool.dateAdded).toLocaleDateString()}</div>
+                </div>
+            `).join('');
+        }
+
+        // Modal Functions
+        function openAddToolModal() {
+            editingToolId = null;
+            document.getElementById('modal-title').textContent = 'Add New Tool';
+            document.getElementById('tool-form').reset();
+            document.getElementById('file-info').classList.remove('active');
+            selectedFilePath = '';
+            currentInputMode = 'file';
+            
+            // Reset toggle buttons
+            document.querySelectorAll('.toggle-btn').forEach((btn, idx) => {
+                btn.classList.toggle('active', idx === 0);
+            });
+            
+            document.getElementById('file-section').classList.add('active');
+            document.getElementById('url-section').classList.remove('active');
+            
+            populateCategorySelect();
+            document.getElementById('tool-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('tool-modal').classList.remove('active');
+            editingToolId = null;
+            selectedFilePath = '';
+        }
+
+        function openDetailModal(toolId) {
+            viewingToolId = toolId;
+            const tool = tools.find(t => t.id === toolId);
+            if (!tool) return;
+
+            document.getElementById('detail-title').textContent = tool.name;
+            document.getElementById('detail-content').innerHTML = `
+                <div class="form-group">
+                    <label>Type</label>
+                    <p>${tool.type === 'file' ? '📁 Local File/Application' : '🌐 Web URL'}</p>
+                </div>
+                <div class="form-group">
+                    <label>Purpose</label>
+                    <p>${tool.purpose}</p>
+                </div>
+                <div class="form-group">
+                    <label>${tool.type === 'file' ? 'File Path' : 'URL'}</label>
+                    <p style="color: var(--accent); word-break: break-all;">${tool.url}</p>
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <p>${tool.category}</p>
+                </div>
+                ${tool.notes ? `
+                <div class="form-group">
+                    <label>Usage Notes</label>
+                    <p style="white-space: pre-wrap;">${tool.notes}</p>
+                </div>
+                ` : ''}
+                <div class="form-group">
+                    <label>Date Added</label>
+                    <p>${new Date(tool.dateAdded).toLocaleString()}</p>
+                </div>
+            `;
+            document.getElementById('detail-modal').classList.add('active');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detail-modal').classList.remove('active');
+            viewingToolId = null;
+        }
+
+        function editCurrentTool() {
+            const tool = tools.find(t => t.id === viewingToolId);
+            if (!tool) return;
+
+            editingToolId = viewingToolId;
+            document.getElementById('modal-title').textContent = 'Edit Tool';
+            document.getElementById('tool-name').value = tool.name;
+            document.getElementById('tool-purpose').value = tool.purpose;
+            document.getElementById('tool-icon').value = tool.icon || '';
+            document.getElementById('tool-notes').value = tool.notes || '';
+            
+            // Set input mode
+            currentInputMode = tool.type;
+            document.querySelectorAll('.toggle-btn').forEach(btn => btn.classList.remove('active'));
+            
+            if (tool.type === 'file') {
+                document.querySelectorAll('.toggle-btn')[0].classList.add('active');
+                document.getElementById('file-section').classList.add('active');
+                document.getElementById('url-section').classList.remove('active');
+                selectedFilePath = tool.url;
+                
+                // Show file info
+                const fileName = tool.url.split(/[\\/]/).pop();
+                document.getElementById('file-name-display').textContent = fileName;
+                document.getElementById('file-path-display').textContent = tool.url;
+                const ext = fileName.split('.').pop().toUpperCase();
+                document.getElementById('file-type-display').textContent = ext;
+                document.getElementById('file-info').classList.add('active');
+            } else {
+                document.querySelectorAll('.toggle-btn')[1].classList.add('active');
+                document.getElementById('url-section').classList.add('active');
+                document.getElementById('file-section').classList.remove('active');
+                document.getElementById('tool-url').value = tool.url;
+            }
+            
+            populateCategorySelect();
+            document.getElementById('tool-category').value = tool.category;
+
+            closeDetailModal();
+            document.getElementById('tool-modal').classList.add('active');
+        }
+
+        function deleteCurrentTool() {
+            if (!confirm('Are you sure you want to delete this tool?')) return;
+            
+            tools = tools.filter(t => t.id !== viewingToolId);
+            saveData();
+            closeDetailModal();
+            renderTools();
+        }
+
+        function populateCategorySelect() {
+            const select = document.getElementById('tool-category');
+            select.innerHTML = categories.map(cat => 
+                `<option value="${cat}" ${cat === currentCategory ? 'selected' : ''}>${cat}</option>`
+            ).join('');
+        }
+
+        function addNewCategory() {
+            const name = prompt('Enter new category name:');
+            if (!name || categories.includes(name)) return;
+            
+            categories.push(name);
+            saveData();
+            renderTabs();
+            populateCategorySelect();
+            document.getElementById('tool-category').value = name;
+        }
+
+        // Tool Management
+        function saveTool(event) {
+            event.preventDefault();
+            
+            let toolUrl = '';
+            let toolType = currentInputMode;
+            
+            if (currentInputMode === 'file') {
+                if (!selectedFilePath) {
+                    alert('Please select a file first!');
+                    return;
+                }
+                toolUrl = selectedFilePath;
+            } else {
+                toolUrl = document.getElementById('tool-url').value;
+                if (!toolUrl) {
+                    alert('Please enter a URL!');
+                    return;
+                }
+            }
+            
+            const tool = {
+                id: editingToolId || Date.now().toString(),
+                name: document.getElementById('tool-name').value,
+                url: toolUrl,
+                type: toolType,
+                category: document.getElementById('tool-category').value,
+                purpose: document.getElementById('tool-purpose').value,
+                icon: document.getElementById('tool-icon').value,
+                notes: document.getElementById('tool-notes').value,
+                dateAdded: editingToolId ? tools.find(t => t.id === editingToolId).dateAdded : new Date().toISOString()
+            };
+
+            if (editingToolId) {
+                const index = tools.findIndex(t => t.id === editingToolId);
+                tools[index] = tool;
+            } else {
+                tools.push(tool);
+            }
+
+            saveData();
+            closeModal();
+            renderTools();
+        }
+
+        function openTool(url, type) {
+            if (type === 'file') {
+                // Copy file path to clipboard
+                navigator.clipboard.writeText(url).then(() => {
+                    // Show modal with instructions
+                    const modal = document.createElement('div');
+                    modal.style.cssText = `
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: var(--bg-secondary);
+                        border: 2px solid var(--accent);
+                        border-radius: 12px;
+                        padding: 2rem;
+                        z-index: 10000;
+                        max-width: 500px;
+                        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+                    `;
+                    
+                    modal.innerHTML = `
+                        <div style="text-align: center;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">📂</div>
+                            <h3 style="margin-bottom: 1rem; color: var(--text-primary);">File Path Copied!</h3>
+                            <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
+                                To launch this file, use one of these methods:
+                            </p>
+                            <div style="text-align: left; background: var(--bg-primary); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                                <div style="margin-bottom: 0.75rem;">
+                                    <strong style="color: var(--accent);">Windows:</strong>
+                                    <br>Press <kbd style="background: var(--bg-tertiary); padding: 0.25rem 0.5rem; border-radius: 4px;">Win + R</kbd>, paste and press Enter
+                                </div>
+                                <div style="margin-bottom: 0.75rem;">
+                                    <strong style="color: var(--accent);">File Explorer:</strong>
+                                    <br>Paste in address bar and press Enter
+                                </div>
+                                <div>
+                                    <strong style="color: var(--accent);">Command Prompt:</strong>
+                                    <br>Type <code style="background: var(--bg-tertiary); padding: 0.25rem 0.5rem; border-radius: 4px;">start ""</code> then paste
+                                </div>
+                            </div>
+                            <div style="background: var(--bg-tertiary); padding: 0.75rem; border-radius: 6px; font-family: monospace; font-size: 0.85rem; word-break: break-all; margin-bottom: 1rem; color: var(--text-primary);">
+                                ${url}
+                            </div>
+                            <button onclick="this.parentElement.parentElement.remove()" style="
+                                background: var(--accent);
+                                color: white;
+                                border: none;
+                                padding: 0.75rem 2rem;
+                                border-radius: 6px;
+                                cursor: pointer;
+                                font-weight: 600;
+                                font-size: 1rem;
+                            ">Got it!</button>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(modal);
+                    
+                    // Auto-remove after 10 seconds
+                    setTimeout(() => {
+                        if (modal.parentElement) {
+                            modal.remove();
+                        }
+                    }, 10000);
+                }).catch(() => {
+                    alert('File path: ' + url + '\n\nPress Win+R and paste this path to open the file.');
+                });
+            } else {
+                window.open(url, '_blank');
+            }
+        }
+
+        // Export/Import Functions
+        function exportData() {
+            const data = {
+                tools,
+                categories,
+                exportDate: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pdto-backup-${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'application/json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        if (confirm('This will replace all current data. Continue?')) {
+                            tools = data.tools || [];
+                            categories = data.categories || [];
+                            saveData();
+                            init();
+                        }
+                    } catch (error) {
+                        alert('Invalid backup file');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Start the app
+        init();
+    </script>
+</body>
+</html>
